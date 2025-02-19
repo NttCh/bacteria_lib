@@ -1,13 +1,15 @@
 """
 Utility module for bacteria_lib.
 
-This module includes helper functions like load_obj and set_seed.
+Contains helper functions like load_obj and set_seed.
 """
 
 import numpy as np
 import torch
+import random
 
-def load_obj(obj_path: str) -> any:
+
+def load_obj(obj_path: str):
     """
     Dynamically load an object from a given module path.
 
@@ -31,7 +33,6 @@ def set_seed(seed: int = 666) -> None:
     Args:
         seed (int): The random seed.
     """
-    import random
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
