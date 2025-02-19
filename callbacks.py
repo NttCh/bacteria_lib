@@ -1,20 +1,23 @@
 """
 Callbacks module for bacteria_lib.
 
-This module provides custom callbacks for metric plotting and Optuna reporting.
+Provides custom PyTorch Lightning callbacks for plotting metrics
+and reporting metrics to Optuna.
 """
 
-import matplotlib.pyplot as plt
 import numpy as np
+import matplotlib.pyplot as plt
 import os
 import pytorch_lightning as pl
-from typing import List
 import optuna
+from optuna.exceptions import TrialPruned
+from typing import List
 
 
 class PlotMetricsCallback(pl.Callback):
     """
-    Callback to plot training and validation metrics at the end of training.
+    A PyTorch Lightning callback to plot training and validation metrics 
+    at the end of training.
     """
     def __init__(self) -> None:
         super().__init__()
@@ -26,8 +29,9 @@ class PlotMetricsCallback(pl.Callback):
 
     def on_validation_epoch_end(self, trainer: pl.Trainer, pl_module: pl.LightningModule) -> None:
         """
-        Log metrics at the end of each validation epoch.
+        Log training and validation metrics at the end of each validation epoch.
         """
+        import numpy as np  # local import to avoid top-level collisions
         epoch = trainer.current_epoch
         self.epochs.append(epoch)
         train_loss = trainer.callback_metrics.get("train_loss")
@@ -42,7 +46,7 @@ class PlotMetricsCallback(pl.Callback):
 
     def on_train_end(self, trainer: pl.Trainer, pl_module: pl.LightningModule) -> None:
         """
-        Plot and save the training metrics after training ends.
+        At the end of training, plot and save the metrics.
         """
         fig, axs = plt.subplots(2, 1, figsize=(10, 10))
         axs[0].plot(self.epochs, self.train_losses, label="Train Loss", marker="o")
@@ -70,7 +74,8 @@ class PlotMetricsCallback(pl.Callback):
 
 class OptunaReportingCallback(pl.Callback):
     """
-    Callback to report validation metrics to an Optuna trial.
+    A PyTorch Lightning callback that reports a metric to an Optuna trial 
+    at the end of each validation epoch.
     """
     def __init__(self, trial: optuna.trial.Trial, metric_name: str = "val_acc") -> None:
         super().__init__()
@@ -79,10 +84,10 @@ class OptunaReportingCallback(pl.Callback):
 
     def on_validation_epoch_end(self, trainer: pl.Trainer, pl_module: pl.LightningModule) -> None:
         """
-        Report the specified metric to the Optuna trial.
+        Report the validation metric to the Optuna trial.
         """
         val_metric = trainer.callback_metrics.get(self.metric_name)
         if val_metric is not None:
             self.trial.report(val_metric.item(), step=trainer.current_epoch)
             if self.trial.should_prune():
-                raise optuna.exceptions.TrialPruned()
+                raise TrialPruned()
