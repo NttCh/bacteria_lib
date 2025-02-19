@@ -1,14 +1,16 @@
 """
 Data module for bacteria_lib.
 
-This module contains the PatchClassificationDataset class for loading and processing
-image data for bacteria detection/classification.
+Provides the PatchClassificationDataset for loading image data and labels.
 """
 
 import os
+import cv2
+import numpy as np
 import pandas as pd
 from torch.utils.data import Dataset
 from typing import Any, Optional, Tuple
+
 
 class PatchClassificationDataset(Dataset):
     """
@@ -19,7 +21,7 @@ class PatchClassificationDataset(Dataset):
         Initialize the dataset.
 
         Args:
-            data (Any): CSV file path or DataFrame containing image paths and labels.
+            data (Any): A CSV file path or a DataFrame containing image paths and labels.
             image_dir (str): Directory where images are stored.
             transforms (Optional[Any]): Albumentations transforms to apply.
         """
@@ -42,7 +44,7 @@ class PatchClassificationDataset(Dataset):
         self.transforms = transforms
 
     def __len__(self) -> int:
-        """Return the number of samples."""
+        """Return the number of samples in the dataset."""
         return len(self.df)
 
     def __getitem__(self, idx: int) -> Tuple[Any, int]:
@@ -66,11 +68,11 @@ class PatchClassificationDataset(Dataset):
                 image_path = alternative_path
                 print(f"Using alternative image path: {image_path}")
             else:
-                raise FileNotFoundError(f"Image not found in either location: {primary_path} or {alternative_path}")
-        # Read and process the image
-        import cv2  # Import locally if needed
+                raise FileNotFoundError(
+                    f"Image not found in either location: {primary_path} or {alternative_path}"
+                )
         image = cv2.imread(image_path, cv2.IMREAD_COLOR)
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB).astype("float32")
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB).astype(np.float32)
         if self.transforms:
             augmented = self.transforms(image=image)
             image = augmented["image"]
