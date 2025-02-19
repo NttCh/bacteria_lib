@@ -1,11 +1,13 @@
 """
 Models module for bacteria_lib.
 
-This module contains functions to build the classifier model.
+Contains functions to build the classifier model, including backbone selection.
 """
 
 import torch.nn as nn
 from omegaconf import DictConfig
+from .utils import load_obj
+
 
 def build_classifier(cfg: DictConfig, num_classes: int) -> nn.Module:
     """
@@ -18,8 +20,6 @@ def build_classifier(cfg: DictConfig, num_classes: int) -> nn.Module:
     Returns:
         nn.Module: The classifier model.
     """
-    from .utils import load_obj  # Use our library's utility function.
-    # For example, using ResNet50 weights enum:
     from torchvision.models import ResNet50_Weights
     backbone_cls = load_obj(cfg.model.backbone.class_name)
     weights_str = cfg.model.backbone.params.get("weights", None)
