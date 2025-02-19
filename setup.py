@@ -18,9 +18,9 @@ setup(
         "matplotlib",
         "seaborn",
     ],
-    author="Natthacha Duangkaew",
+    author="Your Name",
     description="A library for bacteria detection and classification using deep learning.",
-    long_description=open("README.md").read(),
+    long_description="A longer description for your library, or read from a README.md",
     long_description_content_type="text/markdown",
     url="https://github.com/yourusername/bacteria_lib",
     classifiers=[
